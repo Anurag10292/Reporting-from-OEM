@@ -1,0 +1,30 @@
+SET LINESIZE 250
+SET PAGESIZE 1000
+ 
+COLUMN JOB_NAME FORMAT A35
+COLUMN TARGET_NAME FORMAT A35
+COLUMN TARGET_TYPE FORMAT A20
+COLUMN STATUS FORMAT A15
+COLUMN START_TIME FORMAT A20
+COLUMN END_TIME FORMAT A20
+COLUMN DURATION_MINS FORMAT 999999.99
+ 
+SELECT
+job_name,
+target_name,
+target_type,
+status,
+TO_CHAR(start_time,
+'DD-MON-YYYY HH24:MI:SS') AS start_time,
+TO_CHAR(end_time,
+'DD-MON-YYYY HH24:MI:SS') AS end_time,
+ROUND((end_time - start_time) * 24 * 60, 2)
+AS duration_mins
+FROM sysman.mgmt$job_execution_history
+WHERE start_time >= SYSDATE - 1
+AND (
+UPPER(job_name) LIKE '%BACKUP%'
+OR UPPER(job_name) LIKE '%RMAN%'
+)
+ORDER BY
+start_time DESC;
